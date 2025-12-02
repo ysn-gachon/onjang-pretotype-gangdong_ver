@@ -1,0 +1,75 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+    font-variation-settings: "opsz" 32;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 231 233 237;
+    --foreground: 8 12 16;
+    --card: 255 255 255;
+    --card-foreground: 8 12 16;
+    --popover: 255 255 255;
+    --popover-foreground: 8 12 16;
+    --primary: 56 180 134;
+    --primary-foreground: 255 255 255;
+    --secondary: 236 238 242;
+    --secondary-foreground: 8 12 16;
+    --muted: 236 238 242;
+    --muted-foreground: 8 12 16;
+    --accent: 236 238 242;
+    --accent-foreground: 8 12 16;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 221 225 231;
+    --input: 221 225 231;
+    --ring: 56 180 134;
+    --radius: 16px;
+  }
+}
+
+@layer base {
+  body {
+    background: #E7E9ED;
+    color: rgba(8, 12, 16, 0.85);
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  p {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  button {
+    font-size: 15px;
+    font-weight: 500;
+  }
+}
