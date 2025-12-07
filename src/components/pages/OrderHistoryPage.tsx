@@ -16,7 +16,7 @@ interface OrderHistoryPageProps {
 }
 
 export const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ orders, onBack, onNavigateToSupport }) => {
-  const deliveryFee = 2000;
+  const deliveryFee = 1900;
 
   return (
     <motion.div

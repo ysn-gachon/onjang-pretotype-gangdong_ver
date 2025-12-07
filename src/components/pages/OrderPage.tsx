@@ -36,7 +36,7 @@ export const OrderPage: React.FC<OrderPageProps> = ({
   const [completedIsFakedoor, setCompletedIsFakedoor] = useState(false);
   const [completedCompensationCode, setCompletedCompensationCode] = useState<string | undefined>(undefined);
 
-  const deliveryFee = 2000;
+  const deliveryFee = 1900;
   const totalAmount = cartTotal + deliveryFee;
 
   const handleOrder = () => {

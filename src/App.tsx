@@ -151,7 +151,7 @@ export default function App() {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.finalPrice * item.quantity), 0);
-  const deliveryFee = 2000;
+  const deliveryFee = 1900;
   const minOrderAmount = 15000;
   const canOrder = cartTotal >= minOrderAmount;
 
