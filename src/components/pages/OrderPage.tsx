@@ -7,6 +7,7 @@ import { GoogleLoginModal } from '../GoogleLoginModal';
 import { CheckCircle2 } from 'lucide-react';
 import { CartItem } from '../../types/menu';
 import { trackEvent } from '../../hooks/useGA';
+import { supabase } from '../../lib/supabase';
 
 interface OrderPageProps {
   cart: CartItem[];
@@ -19,9 +20,9 @@ interface OrderPageProps {
   onFakedoor: (compensationCode?: string) => void;
 }
 
-export const OrderPage: React.FC<OrderPageProps> = ({ 
-  cart, 
-  cartTotal, 
+export const OrderPage: React.FC<OrderPageProps> = ({
+  cart,
+  cartTotal,
   onBack,
   onClearCart,
   onNavigateToHistory,
@@ -35,16 +36,71 @@ export const OrderPage: React.FC<OrderPageProps> = ({
   const [showFakedoorModal, setShowFakedoorModal] = useState(false);
   const [completedIsFakedoor, setCompletedIsFakedoor] = useState(false);
   const [completedCompensationCode, setCompletedCompensationCode] = useState<string | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const deliveryFee = 1900;
   const totalAmount = cartTotal + deliveryFee;
 
-  const handleOrder = () => {
+  const saveOrderToSupabase = async (isFakedoor: boolean, compensationCode?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
+
+      // 1. Insert Order
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: userId,
+          total_amount: totalAmount,
+          status: isFakedoor ? 'completed' : 'pending',
+          payment_method: isFakedoor ? 'compensation' : 'account_transfer',
+          is_fakedoor: isFakedoor,
+          compensation_code: compensationCode,
+          delivery_address: '' // Not collected in this step yet
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('Error saving order:', orderError);
+        return;
+      }
+
+      if (orderData) {
+        // 2. Insert Order Items
+        const orderItems = cart.map(item => ({
+          order_id: orderData.id,
+          menu_item_id: item.menuItem.id,
+          menu_item_name: item.menuItem.name,
+          quantity: item.quantity,
+          unit_price: item.finalPrice,
+          selected_options: item.selectedOption ? [{ label: item.selectedOption }] : []
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) {
+          console.error('Error saving order items:', itemsError);
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error saving order:', err);
+    }
+  };
+
+  const handleOrder = async () => {
     // When user clicks the order button, open the external site directly.
     // The button is already disabled by `isValid` when name/phone/address/minimum are not met.
     const itemSummary = cart.map(item => `${item.menuItem.name}(${item.quantity})`).join(', ');
     trackEvent('Order', 'Click', `Items: ${itemSummary} | Total: ${totalAmount}`);
-    
+
+    // Save to Supabase (non-blocking or blocking? blocking to ensure record)
+    setIsSubmitting(true);
+    await saveOrderToSupabase(false);
+    setIsSubmitting(false);
+
     const url = 'https://m.site.naver.com/1WItQ';
     window.open(url, '_blank', 'noopener,noreferrer');
     return;
@@ -70,14 +126,20 @@ export const OrderPage: React.FC<OrderPageProps> = ({
     setShowFakedoorModal(false);
   };
 
-  const handleAcceptFakedoor = () => {
+  const handleAcceptFakedoor = async () => {
     // generate a simple compensation code
     const code = `BUD-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+    // Save to Supabase
+    setIsSubmitting(true);
+    await saveOrderToSupabase(true, code);
+    setIsSubmitting(false);
+
     // notify app to record fakedoor event and clear cart
     onFakedoor(code);
     setShowFakedoorModal(false);
     setCompletedOrderTotal(cartTotal);
-    
+
     setCompletedIsFakedoor(true);
     setCompletedCompensationCode(code);
     setOrderComplete(true);
@@ -131,7 +193,7 @@ export const OrderPage: React.FC<OrderPageProps> = ({
             <p className="text-[14px] text-[#101318]/80">결제는 배달 후 계좌이체로 진행됩니다.</p>
           </div>
 
-          
+
 
           {/* Contact Information */}
           <div className="pt-4 border-t border-[#101318]/10 space-y-1">
@@ -205,7 +267,7 @@ export const OrderPage: React.FC<OrderPageProps> = ({
           </div>
         </GlassCard>
 
-        
+
 
         {/* Total amount */}
         <div className="pt-2 pb-2 flex justify-between items-center">

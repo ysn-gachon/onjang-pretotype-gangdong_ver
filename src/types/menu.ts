@@ -9,6 +9,7 @@ export interface MenuItem {
   price: number;
   vendor: string;
   market: string;
+  image?: string;
   description?: string;
   options?: MenuOption[];
   isRecommended?: boolean;

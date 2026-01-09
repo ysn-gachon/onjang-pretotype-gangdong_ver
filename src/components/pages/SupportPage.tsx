@@ -38,7 +38,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onBack }) => {
               <h3 className="text-[16px] text-[#101318] text-center" style={{ fontWeight: 600 }}>
                 문의 / 고객지원
               </h3>
-              
+
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.14] backdrop-blur-[12px] border border-white/[0.18]">
@@ -64,6 +64,21 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onBack }) => {
               </div>
             </div>
           </GlassCard>
+
+          {/* Hidden Admin Tools */}
+          <div className="mt-8 flex justify-center opacity-30 hover:opacity-100 transition-opacity">
+            <button
+              onClick={async () => {
+                if (confirm('데이터베이스를 초기화(Seed) 하시겠습니까?')) {
+                  const { seedDatabase } = await import('../../utils/seedDatabase');
+                  seedDatabase();
+                }
+              }}
+              className="text-[11px] text-[#101318]/40 underline"
+            >
+              DB Setup (Admin)
+            </button>
+          </div>
         </motion.div>
       </div>
     </motion.div>
